@@ -3,8 +3,12 @@ use crate::{
     ui::{DownloadMessage, Message},
 };
 use base64::decode;
-use openssl::hash::{hash, MessageDigest};
-use openssl::symm::{decrypt, Cipher};
+
+use aes::Aes256;
+use block_modes::block_padding::Pkcs7;
+use block_modes::{BlockMode, Cbc};
+
+use md5::{Digest, Md5};
 
 use reqwest::{
     header::{HeaderMap, HeaderValue, CACHE_CONTROL, USER_AGENT},
@@ -151,35 +155,73 @@ fn get_salt_and_data(data: Vec<u8>) -> Option<(Vec<u8>, Vec<u8>)> {
 
 fn bytes_to_key(data: Vec<u8>, salt: Vec<u8>) -> Result<Vec<u8>, Box<dyn Error>> {
     let data_and_salt = [data, salt].concat();
+    let mut key = Md5::digest(data_and_salt.as_ref());
 
-    let mut key = hash(MessageDigest::md5(), data_and_salt.as_ref())?;
+    // let mut key = hash(MessageDigest::md5(), data_and_salt.as_ref())?;
     let mut final_key: Vec<u8> = Vec::with_capacity(64);
-
+    // key.as_slice().clone().to_vec();
     final_key.append(&mut key.to_vec());
 
     while final_key.len() < 48 {
-        key = hash(
-            MessageDigest::md5(),
-            [key.to_vec(), data_and_salt.clone()].concat().as_ref(),
-        )
-        .unwrap();
+        key = Md5::digest([key.to_vec(), data_and_salt.clone()].concat().as_ref());
         final_key.append(&mut key.to_vec())
     }
 
     Ok(final_key[0..48].to_vec())
 }
 
+// fn bytes_to_key(data: Vec<u8>, salt: Vec<u8>) -> Result<Vec<u8>, Box<dyn Error>> {
+//     let data_and_salt = [data, salt].concat();
+//     let mut key = Md5::digest(data_and_salt.as_ref());
+
+//     let mut key = hash(MessageDigest::md5(), data_and_salt.as_ref())?;
+//     let mut final_key: Vec<u8> = Vec::with_capacity(64);
+
+//     final_key.append(&mut key.to_vec());
+
+//     while final_key.len() < 48 {
+//         key = hash(
+//             MessageDigest::md5(),
+//             [key.to_vec(), data_and_salt.clone()].concat().as_ref(),
+//         )
+//         .unwrap();
+//         final_key.append(&mut key.to_vec())
+//     }
+
+//     Ok(final_key[0..48].to_vec())
+// }
+
+// fn decrypt_data(encrypted_data: &str) -> Result<String, Box<dyn Error>> {
+//     let decoded_encrypted_data = decode(encrypted_data)?;
+//     let (salt, text): (Vec<u8>, Vec<u8>) = get_salt_and_data(decoded_encrypted_data).unwrap();
+
+//     let key_iv = bytes_to_key(KEY.to_vec(), salt)?;
+//     let key = key_iv[0..32].to_vec();
+//     let iv = key_iv[32..].to_vec();
+
+//     let cipher = Cipher::aes_256_cbc();
+//     let decrypted_text = decrypt(cipher, &key, Some(&iv), &text)?;
+//     let decrypted_string = String::from_utf8(decrypted_text)?;
+//     Ok(decrypted_string)
+// }
+
+type Aes256Cbc = Cbc<Aes256, Pkcs7>;
+
 fn decrypt_data(encrypted_data: &str) -> Result<String, Box<dyn Error>> {
     let decoded_encrypted_data = decode(encrypted_data)?;
-    let (salt, text): (Vec<u8>, Vec<u8>) = get_salt_and_data(decoded_encrypted_data).unwrap();
+    let (salt, mut text): (Vec<u8>, Vec<u8>) = get_salt_and_data(decoded_encrypted_data).unwrap();
+    let text = text.as_mut_slice();
 
     let key_iv = bytes_to_key(KEY.to_vec(), salt)?;
     let key = key_iv[0..32].to_vec();
     let iv = key_iv[32..].to_vec();
 
-    let cipher = Cipher::aes_256_cbc();
-    let decrypted_text = decrypt(cipher, &key, Some(&iv), &text)?;
-    let decrypted_string = String::from_utf8(decrypted_text)?;
+    // let a = BlockMode::new_var(&key, &iv);
+    let cipher = Aes256Cbc::new_var(&key, &iv)?;
+    cipher.decrypt(text)?;
+
+    //let decrypted_text = decrypt(cipher, &key, Some(&iv), &text)?;
+    let decrypted_string = String::from_utf8(text.to_vec())?;
     Ok(decrypted_string)
 }
 

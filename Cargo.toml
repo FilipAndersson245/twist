@@ -11,7 +11,7 @@ name = "library"
 path = "src/lib/mod.rs"
 
 [[bin]]
-name = "ttwist"
+name = "twist"
 path = "src/main.rs"
 
 [dependencies]
@@ -25,11 +25,12 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 reqwest = { version = "0.10", features = ["json", "stream"] }
 base64 = "0.12.1"
-openssl-sys = "0.9"
-openssl = "0.10"
 url = "2.1"
 futures ="0.3"
 futures-timer = "3.0"
+block-modes = "0.3"
+aes = "0.3"
+md-5="0.9"
 
 [profile.release]
 lto = true
