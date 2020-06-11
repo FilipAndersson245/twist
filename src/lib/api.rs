@@ -1,5 +1,5 @@
 use crate::{
-    types::{Anime, Animes, DownloadInfo, Episode, Episodes},
+    types::{Anime, Animes, Episode, Episodes},
     ui::{DownloadMessage, Message},
 };
 use base64::decode;
@@ -21,13 +21,15 @@ use std::{
     io::{prelude::*, SeekFrom},
     path::Path,
 };
-use tokio::{sync::mpsc::Sender, time::delay_for};
+use tokio::sync::mpsc::Sender;
 use url::Url;
 
 use serde::{Deserialize, Serialize};
 
 use chrono::{NaiveDate, Utc};
 use serde_json::{de, ser};
+
+type Aes256Cbc = Cbc<Aes256, Pkcs7>;
 
 static KEY: &[u8] = b"LXgIVP&PorO68Rq7dTx8N^lP!Fa5sGJ^*XK";
 
@@ -169,43 +171,6 @@ fn bytes_to_key(data: Vec<u8>, salt: Vec<u8>) -> Result<Vec<u8>, Box<dyn Error>>
 
     Ok(final_key[0..48].to_vec())
 }
-
-// fn bytes_to_key(data: Vec<u8>, salt: Vec<u8>) -> Result<Vec<u8>, Box<dyn Error>> {
-//     let data_and_salt = [data, salt].concat();
-//     let mut key = Md5::digest(data_and_salt.as_ref());
-
-//     let mut key = hash(MessageDigest::md5(), data_and_salt.as_ref())?;
-//     let mut final_key: Vec<u8> = Vec::with_capacity(64);
-
-//     final_key.append(&mut key.to_vec());
-
-//     while final_key.len() < 48 {
-//         key = hash(
-//             MessageDigest::md5(),
-//             [key.to_vec(), data_and_salt.clone()].concat().as_ref(),
-//         )
-//         .unwrap();
-//         final_key.append(&mut key.to_vec())
-//     }
-
-//     Ok(final_key[0..48].to_vec())
-// }
-
-// fn decrypt_data(encrypted_data: &str) -> Result<String, Box<dyn Error>> {
-//     let decoded_encrypted_data = decode(encrypted_data)?;
-//     let (salt, text): (Vec<u8>, Vec<u8>) = get_salt_and_data(decoded_encrypted_data).unwrap();
-
-//     let key_iv = bytes_to_key(KEY.to_vec(), salt)?;
-//     let key = key_iv[0..32].to_vec();
-//     let iv = key_iv[32..].to_vec();
-
-//     let cipher = Cipher::aes_256_cbc();
-//     let decrypted_text = decrypt(cipher, &key, Some(&iv), &text)?;
-//     let decrypted_string = String::from_utf8(decrypted_text)?;
-//     Ok(decrypted_string)
-// }
-
-type Aes256Cbc = Cbc<Aes256, Pkcs7>;
 
 fn decrypt_data(encrypted_data: &str) -> Result<String, Box<dyn Error>> {
     let decoded_encrypted_data = decode(encrypted_data)?;

@@ -2,9 +2,9 @@ use crate::pretty_bytes::convert;
 use std::{error::Error, io::Stdout};
 use tui::{
     backend::CrosstermBackend,
-    layout::{Alignment, Rect},
+    layout::Rect,
     style::{Color, Modifier, Style},
-    widgets::{Block, BorderType, Borders, Gauge, Paragraph, Text},
+    widgets::{Block, BorderType, Borders, Gauge},
     Frame,
 };
 

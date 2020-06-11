@@ -44,11 +44,6 @@ impl Notification {
 
         let paragraphs = List::new(self.rows.iter().cloned()).block(block);
 
-        // let paragraphs = Paragraph::new(self.rows.iter())
-        //     .block(block)
-        //     .alignment(Alignment::Left)
-        //     .wrap(false);
-
         painter.render_widget(paragraphs, chunk);
 
         Ok(())
