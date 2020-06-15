@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-type ID = u64;
+pub type ID = u64;
 
-#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, Clone, Default, Deserialize, Serialize, Hash, Eq, PartialEq)]
 pub struct Anime {
     pub id: ID,
     pub title: String,

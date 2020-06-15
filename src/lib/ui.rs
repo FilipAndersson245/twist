@@ -1,5 +1,6 @@
 use crate::{
     api::{fetch_all_animes, fetch_anime, fetch_video},
+    datastore::{AnimeStore, ANIME_PATH},
     types::{Anime, Animes, DownloadInfo, Episode},
     ui_components::{
         anime::AnimeList, episodes::EpisodeList, notifications::Notification, progress::Progress,
@@ -18,6 +19,7 @@ use std::{
     collections::VecDeque,
     error::Error,
     io::{stdout, Stdout, Write},
+    path::Path,
     time::Duration,
 };
 use tokio::sync::mpsc::{channel, Receiver, Sender};

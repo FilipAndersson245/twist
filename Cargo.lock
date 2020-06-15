@@ -51,6 +51,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "53d1ccbaf7d9ec9537465a97bf19edc1a4e158ecb49fc16178202238c569cc42"
 
 [[package]]
+name = "bincode"
+version = "1.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5753e2a71534719bf3f4e57006c3a4f0d2c672a4b676eec84161f763eca87dbf"
+dependencies = [
+ "byteorder",
+ "serde",
+]
+
+[[package]]
 name = "bitflags"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1120,6 +1130,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tinydb"
+version = "0.0.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "340158125afbd7fe037238139b93bba6e0ff88b715b51936d8fe927256ad9446"
+dependencies = [
+ "bincode",
+ "serde",
+]
+
+[[package]]
 name = "tokio"
 version = "0.2.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1216,6 +1236,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "tinydb",
  "tokio",
  "tui",
  "url",
